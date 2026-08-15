@@ -3,17 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #f5efe6;
   --foreground: #171717;
   --font-alex-brush: 'Alex Brush', cursive;
   --font-playfair: 'Playfair Display', serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
@@ -104,16 +97,13 @@ body {
   }
 
   .gifts-background {
-    background-image: url(/background-mobile.png);
+    background-color: #f5efe6;
+    background-image: url(/lavanda.webp);
     background-size: cover;
-    background-position: center;
+    /* As flores ficam na base da arte e o topo é creme,
+       então ancorar embaixo evita cortar justamente o desenho. */
+    background-position: center bottom;
     background-repeat: no-repeat;
     background-attachment: fixed;
-  }
-
-  @media (min-width: 640px) {
-    .gifts-background {
-      background-image: url(/background.png);
-    }
   }
 }

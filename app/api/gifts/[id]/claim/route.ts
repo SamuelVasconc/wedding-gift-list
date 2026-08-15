@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { claimGift } from '@/lib/sheets';
+import { sendGiftClaimedEmail } from '@/lib/email';
 import { isAuthenticated } from '@/lib/session';
 
 export async function POST(
@@ -34,6 +35,9 @@ export async function POST(
         { status: 409 }
       );
     }
+
+    // A planilha já foi atualizada: o e-mail é best-effort e nunca falha a reserva.
+    await sendGiftClaimedEmail(result.giftName || id, nome.trim());
 
     return NextResponse.json({ success: true });
   } catch (error) {

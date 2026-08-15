@@ -12,8 +12,8 @@ export default function GiftCard({ gift, onReserve }: GiftCardProps) {
   const isReserved = gift.status === 'reservado';
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="relative h-28 sm:h-44 bg-gray-100">
+    <div className="bg-cream rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
+      <div className="relative h-28 sm:h-44 bg-gray-100 shrink-0">
         {gift.imagemUrl ? (
           <Image
             src={gift.imagemUrl}
@@ -41,18 +41,20 @@ export default function GiftCard({ gift, onReserve }: GiftCardProps) {
         )}
       </div>
 
-      <div className="p-1.5 sm:p-3">
-        <h3 className="text-xs sm:text-base font-semibold text-gray-800 mb-1 sm:mb-2 line-clamp-2">
+      <div className="p-1.5 sm:p-3 flex flex-col flex-grow">
+        {/* Alturas fixas (2 linhas) para que todos os cards fiquem do mesmo tamanho,
+            independente do comprimento do nome e da descrição. */}
+        <h3 className="text-xs sm:text-base font-semibold text-gray-800 mb-1 sm:mb-2 line-clamp-2 h-8 sm:h-12">
           {gift.nome}
         </h3>
-        <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2 hidden sm:block">
+        <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2 hidden sm:block sm:h-10">
           {gift.descricao}
         </p>
 
         <button
           onClick={() => onReserve(gift)}
           disabled={isReserved}
-          className={`w-full py-1 sm:py-1.5 px-1.5 sm:px-3 rounded-full text-xs sm:text-sm font-medium transition ${
+          className={`w-full mt-auto py-1 sm:py-1.5 px-1.5 sm:px-3 rounded-full text-xs sm:text-sm font-medium transition ${
             isReserved
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-[#73a66c] text-white hover:bg-[#628f5c]'

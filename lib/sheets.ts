@@ -36,7 +36,10 @@ export async function getGifts(): Promise<Gift[]> {
   }));
 }
 
-export async function claimGift(giftId: string, nome: string): Promise<{ success: boolean; error?: string }> {
+export async function claimGift(
+  giftId: string,
+  nome: string
+): Promise<{ success: boolean; error?: string; giftName?: string }> {
   const sheets = getGoogleSheetsClient();
   const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
 
@@ -68,7 +71,7 @@ export async function claimGift(giftId: string, nome: string): Promise<{ success
       },
     });
 
-    return { success: true };
+    return { success: true, giftName: gift.nome };
   } catch (error) {
     console.error('Error claiming gift:', error);
     return { success: false, error: 'Erro ao presentear' };

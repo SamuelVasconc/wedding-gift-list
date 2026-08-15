@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 export default function PixCard() {
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
+    <div className="bg-cream rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
       <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
         {/* Text content */}
         <div className="flex-1 text-center sm:text-left">

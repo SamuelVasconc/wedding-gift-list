@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Gift } from '@/lib/types';
 import GiftCard from '@/components/GiftCard';
@@ -14,10 +14,37 @@ export default function GiftsPage() {
   const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showSearch, setShowSearch] = useState(true);
+  const lastScrollY = useRef(0);
   const router = useRouter();
 
   useEffect(() => {
     fetchGifts();
+  }, []);
+
+  // Esconde a busca ao rolar para baixo e mostra de volta ao rolar para cima.
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollY.current;
+
+      if (currentY < 80) {
+        setShowSearch(true);
+      } else if (delta > 8) {
+        setShowSearch(false);
+      } else if (delta < -8) {
+        setShowSearch(true);
+      }
+
+      // Só atualiza a referência quando o movimento passa do limiar,
+      // senão roladas muito lentas nunca acumulam delta suficiente.
+      if (Math.abs(delta) > 8) {
+        lastScrollY.current = currentY;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const fetchGifts = async () => {
@@ -85,7 +112,7 @@ export default function GiftsPage() {
 
   return (
     <div className="min-h-screen flex flex-col gifts-background">
-      <header className="bg-white shadow-sm">
+      <header className="bg-cream shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="text-center">
             <h1 className="text-4xl sm:text-5xl font-normal text-gray-800 mb-1 font-alex-brush">
@@ -99,15 +126,46 @@ export default function GiftsPage() {
             </h2>
           </div>
         </div>
+      </header>
 
-        {/* Search Bar */}
-        {!loading && gifts.length > 0 && (
-          <div className="border-t border-gray-200 bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <div className="relative max-w-md mx-auto">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      {/* Search Bar — fixa no topo, some ao rolar para baixo */}
+      {!loading && gifts.length > 0 && (
+        <div
+          className={`sticky top-0 z-30 border-y border-gray-200 bg-cream/95 backdrop-blur-sm shadow-sm transition-transform duration-300 ${
+            showSearch ? 'translate-y-0' : '-translate-y-full'
+          }`}
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+            <div className="relative max-w-md mx-auto">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar presente..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 sm:py-2.5 border border-gray-300 rounded-full text-sm sm:text-base focus:ring-2 focus:ring-[#73a66c] focus:border-transparent outline-none transition text-gray-900 placeholder-gray-400"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                >
                   <svg
-                    className="h-5 w-5 text-gray-400"
+                    className="h-5 w-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -116,44 +174,17 @@ export default function GiftsPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Buscar presente..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-full text-sm sm:text-base focus:ring-2 focus:ring-[#73a66c] focus:border-transparent outline-none transition text-gray-900 placeholder-gray-400"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                  >
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                )}
-              </div>
+                </button>
+              )}
             </div>
           </div>
-        )}
-      </header>
+        </div>
+      )}
 
-      <main className="flex-grow max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 w-full">
+      <main className="flex-grow max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 pb-[calc(4.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(3.5rem+env(safe-area-inset-bottom))] w-full">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
@@ -203,28 +234,30 @@ export default function GiftsPage() {
         )}
       </main>
 
-      <footer className="bg-white border-t border-gray-200 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center">
-            <p className="text-gray-600 text-sm mb-2">
-              Reservou errado? Tendo algum problema com o site? Fale diretamente conosco:
+      <footer className="fixed bottom-0 inset-x-0 z-40 bg-cream/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-1px_3px_rgba(0,0,0,0.04)]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2 pb-[calc(0.375rem+env(safe-area-inset-bottom))] sm:pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-center leading-tight">
+            <p className="text-gray-600 text-[11px] sm:text-xs">
+              <span className="hidden sm:inline">Reservou errado? Tendo algum problema com o site? Fale diretamente conosco:</span>
+              <span className="sm:hidden">Problemas? Fale conosco:</span>
             </p>
             {whatsappNumbers.length > 0 && (
-              <div className="flex flex-col gap-1 mb-4">
+              <div className="flex flex-wrap items-center justify-center gap-x-2">
                 {whatsappNumbers.map((number, index) => (
                   <a
                     key={index}
                     href={`https://wa.me/${number.replace(/\D/g, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700 transition text-sm font-medium"
+                    className="text-blue-600 hover:text-blue-700 transition text-[11px] sm:text-xs font-medium"
                   >
                     {number.trim()}
                   </a>
                 ))}
               </div>
             )}
-            <p className="text-gray-400 text-xs">
+            <span className="hidden sm:inline text-gray-300 text-xs">•</span>
+            <p className="text-gray-400 text-[10px] sm:text-xs w-full sm:w-auto">
               Criado por:{' '}
               <a
                 href="https://github.com/samuelvasconc"
