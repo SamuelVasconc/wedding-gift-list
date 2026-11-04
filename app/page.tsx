@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation";
+import { isAuthBypassed } from "@/lib/auth-bypass";
+
+export const dynamic = "force-dynamic";
 
 export default function Home() {
-  redirect("/login");
+  redirect(isAuthBypassed() ? "/gifts" : "/login");
 }

@@ -1,5 +1,6 @@
 import { getIronSession, IronSession } from 'iron-session';
 import { cookies } from 'next/headers';
+import { isAuthBypassed } from './auth-bypass';
 
 export interface SessionData {
   isAuthenticated: boolean;
@@ -23,6 +24,7 @@ export async function getSession(): Promise<IronSession<SessionData>> {
 }
 
 export async function isAuthenticated(): Promise<boolean> {
+  if (isAuthBypassed()) return true;
   const session = await getSession();
   return session.isAuthenticated === true;
 }
