@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import { getGifts } from '@/lib/sheets';
 import { isAuthenticated } from '@/lib/session';
 
+// Always fetch fresh data from the sheet. Without this, when SKIP_AUTH=true
+// the handler never touches cookies(), so Next.js would prerender it once at
+// build time and serve a stale snapshot forever.
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const authenticated = await isAuthenticated();
